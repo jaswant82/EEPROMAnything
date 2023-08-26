@@ -1,32 +1,45 @@
-//EEPROMAnything is taken from here: http://www.arduino.cc/playground/Code/EEPROMWriteAnything
 
-#ifndef EEPROMAnything_h
-#define EEPROMAnything_h
-
-#include "EEPROM.h"
-#if ARDUINO < 100
-#include <WProgram.h>
-#else
-#include <Arduino.h>
-#endif
+#include <EEPROM.h>
+#include <Arduino.h>  // for type definitions
 
 template <class T> int EEPROM_writeAnything(int ee, const T& value)
 {
     const byte* p = (const byte*)(const void*)&value;
-    int i;
+    unsigned int i;
     for (i = 0; i < sizeof(value); i++)
-        EEPROM.update(ee++, *p++);
+          EEPROM.write(ee++, *p++);
     return i;
 }
 
 template <class T> int EEPROM_readAnything(int ee, T& value)
 {
     byte* p = (byte*)(void*)&value;
-    int i;
+    unsigned int i;
     for (i = 0; i < sizeof(value); i++)
-        *p++ = EEPROM.read(ee++);
+          *p++ = EEPROM.read(ee++);
     return i;
 }
+#include <EEPROM.h>
+#include "EEPROMAnything.h"
 
-#endif
+struct config_t
+{
+    long alarm;
+    int mode;
+} configuration;
 
+void setup()
+{
+    EEPROM_readAnything(0, configuration);
+    // ...
+}
+void loop()
+{
+    // let the user adjust their alarm settings
+    // let the user adjust their mode settings
+    // ...
+
+    // if they push the "Save" button, save their configuration
+    if (digitalRead(13) == HIGH)
+        EEPROM_writeAnything(0, configuration);
+}
